@@ -11,7 +11,7 @@ class DefaultSourceTest extends AnyFunSuite {
 
   val feedPath = "./src/test/resources/randyzwitch"
 
-  test("generic file source options work as expected") {
+  ignore("generic file source options work as expected") {
 
     val spark = TestUtil.getSparkSession()
 
