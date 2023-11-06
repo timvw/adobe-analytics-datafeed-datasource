@@ -38,7 +38,7 @@ We also support the Generic file source options:
 
 ```scala
 val df = spark.read
-  .format("clickstream")
+  .format("be.timvw.adobe.analytics.datafeed")
   .option(ClickstreamOptions.MODIFIED_AFTER, "2023-11-01T00:00:00")
   .load("./src/test/resources/randyzwitch")
 ```
