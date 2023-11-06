@@ -1,0 +1,13 @@
+Datafeed-Manifest-Version: 1.0
+Lookup-Files: 1
+Data-Files: 1
+Total-Records: 592
+
+Lookup-File: zwitchdev_2015-07-13-lookup_data.tar.gz
+MD5-Digest: 5fc56e6872b75870d9be809fdc97459f
+File-Size: 3129118
+
+Data-File: 01-zwitchdev_2015-07-13.tsv.gz
+MD5-Digest: 994c3109e0ddbd7c66c360426eaf0cd1
+File-Size: 75830
+Record-Count: 592
