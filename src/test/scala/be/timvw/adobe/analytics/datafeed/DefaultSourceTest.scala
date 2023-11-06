@@ -17,7 +17,7 @@ class DefaultSourceTest extends AnyFunSuite {
 
     val df = spark.read
       .format("datafeed")
-      .option(DatafeedOptions.MODIFIED_AFTER, "2023-11-06T14:56:00")
+      .option(DatafeedOptions.MODIFIED_AFTER, "2023-11-01T14:56:00")
       .load(feedPath)
 
     assert(df.count() == 0)
