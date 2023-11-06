@@ -1,3 +1,5 @@
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/be.timvw/adobe-analytics-datafeed-datasource_2.12/badge.svg)](https://central.sonatype.com/artifact/be.timvw/adobe-analytics-datafeed-datasource_2.12)
+
 # Datasource for Adobe Analytics Data Feed
 
 Adobe Analytics [Data feeds](https://experienceleague.adobe.com/docs/analytics/export/analytics-data-feed/data-feed-contents/datafeeds-contents.html?lang=en) are a means to get raw data out of Adobe Analytics.
@@ -10,7 +12,7 @@ Concretly, escaped values are not handled correctly by a CSV parser due to inher
 Make sure the package is in the classpath, eg: by using the --packages option:
 
 ```bash
-spark-shell --packages "be.timvw:adobe-analytics-datafeed-datasource_2.12:0.1.0"
+spark-shell --packages "be.timvw:adobe-analytics-datafeed-datasource_2.12:0.0.1"
 ```
 
 And you can read the feed as following:

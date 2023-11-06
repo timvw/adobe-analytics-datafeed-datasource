@@ -2,8 +2,8 @@ lazy val scala212 = "2.12.18"
 
 lazy val supportedScalaVersions = List(scala212)
 
-ThisBuild / organization := "be.timvw"
-ThisBuild / name := "adobe-analytics-datafeed-datasource"
+organization := "be.timvw"
+name := "adobe-analytics-datafeed-datasource"
 
 ThisBuild / homepage := Some(url("https://github.com/timvw/adobe-analytics-datafeed-datasource"))
 ThisBuild / licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
