@@ -1,3 +1,4 @@
+-- proper file
 Datafeed-Manifest-Version: 1.0
 Lookup-Files: 1
 Data-Files: 1
