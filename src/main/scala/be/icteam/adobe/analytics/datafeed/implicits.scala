@@ -1,4 +1,4 @@
-package be.timvw.adobe.analytics.datafeed
+package be.icteam.adobe.analytics.datafeed
 
 import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 import org.apache.spark.sql.streaming.DataStreamReader

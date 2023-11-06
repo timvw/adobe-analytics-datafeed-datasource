@@ -1,4 +1,4 @@
-package be.timvw.adobe.analytics.datafeed
+package be.icteam.adobe.analytics.datafeed
 
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.catalyst.InternalRow

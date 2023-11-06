@@ -1,4 +1,4 @@
-package be.timvw.adobe.analytics.datafeed
+package be.icteam.adobe.analytics.datafeed
 
 import org.apache.spark.sql.connector.read.InputPartition
 

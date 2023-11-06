@@ -1,4 +1,4 @@
-package be.timvw.adobe.analytics.datafeed
+package be.icteam.adobe.analytics.datafeed
 
 import com.univocity.parsers.tsv.{TsvParser, TsvParserSettings}
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream

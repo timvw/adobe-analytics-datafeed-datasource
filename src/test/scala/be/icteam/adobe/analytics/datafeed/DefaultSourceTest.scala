@@ -1,10 +1,10 @@
-package be.timvw.adobe.analytics.datafeed
+package be.icteam.adobe.analytics.datafeed
 
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.sql.{AnalysisException, SparkSession}
 // needed for 'the read clickstream extension method works' test
-import be.timvw.adobe.analytics.datafeed.implicits._
+import be.icteam.adobe.analytics.datafeed.implicits._
 import org.scalatest.funsuite.AnyFunSuite
 
 class DefaultSourceTest extends AnyFunSuite {

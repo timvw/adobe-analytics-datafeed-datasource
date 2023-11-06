@@ -2,7 +2,7 @@ lazy val scala212 = "2.12.18"
 
 lazy val supportedScalaVersions = List(scala212)
 
-organization := "be.timvw"
+organization := "be.icteam"
 name := "adobe-analytics-datafeed-datasource"
 
 ThisBuild / homepage := Some(url("https://github.com/timvw/adobe-analytics-datafeed-datasource"))

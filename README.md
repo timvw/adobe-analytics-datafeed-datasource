@@ -1,4 +1,4 @@
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/be.timvw/adobe-analytics-datafeed-datasource_2.12/badge.svg)](https://central.sonatype.com/artifact/be.timvw/adobe-analytics-datafeed-datasource_2.12)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/be.icteam/adobe-analytics-datafeed-datasource_2.12/badge.svg)](https://central.sonatype.com/artifact/be.icteam/adobe-analytics-datafeed-datasource_2.12)
 
 # Datasource for Adobe Analytics Data Feed
 
@@ -12,14 +12,14 @@ Concretly, escaped values are not handled correctly by a CSV parser due to inher
 Make sure the package is in the classpath, eg: by using the --packages option:
 
 ```bash
-spark-shell --packages "be.timvw:adobe-analytics-datafeed-datasource_2.12:0.0.1"
+spark-shell --packages "be.icteam:adobe-analytics-datafeed-datasource_2.12:0.0.1"
 ```
 
 And you can read the feed as following:
 
 ```scala
 val df = spark.read
-  .format("be.timvw.adobe.analytics.datafeed")
+  .format("be.icteam.adobe.analytics.datafeed")
   .load("./src/test/resources/randyzwitch")
 ```
 
@@ -40,7 +40,7 @@ We also support the Generic file source options:
 
 ```scala
 val df = spark.read
-  .format("be.timvw.adobe.analytics.datafeed")
+  .format("be.icteam.adobe.analytics.datafeed")
   .option(ClickstreamOptions.MODIFIED_AFTER, "2023-11-01T00:00:00")
   .load("./src/test/resources/randyzwitch")
 ```
