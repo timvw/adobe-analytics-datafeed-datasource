@@ -28,12 +28,15 @@ trait ValuesContributor {
 case class Contributor(contributedFields: List[StructField], contributeFunction: (GenericInternalRow, Array[String]) => Unit)
 
 case class CompositeValuesContributor(valuesContributors: List[ValuesContributor]) extends ValuesContributor {
-  override def getFieldsWhichCanBeContributed(): List[StructField] = valuesContributors.foldLeft(Set.empty[StructField])((acc, x) => acc ++ x.getFieldsWhichCanBeContributed()).toList
+  override def getFieldsWhichCanBeContributed(): List[StructField] = {
+    valuesContributors.foldLeft(List.empty[StructField])((acc, x) => {
+      acc ++ x.getFieldsWhichCanBeContributed().filter(x => !acc.exists(_.name == x.name))
+    })
+  }
   override def getContributor(alreadyContributedFields: List[StructField], requestedSchema: StructType): Contributor = {
-    // update thingie..
     val compositeValuesContributorParts = valuesContributors.foldLeft((alreadyContributedFields, List.empty[(GenericInternalRow, Array[String]) => Unit]))((acc, valuesContributor) => {
       val contributor = valuesContributor.getContributor(acc._1, requestedSchema)
-      val contributedValues = alreadyContributedFields ++ contributor.contributedFields
+      val contributedValues = acc._1 ++ contributor.contributedFields
       val contributorActions = acc._2 ++ List(contributor.contributeFunction)
       (contributedValues, contributorActions)
     })
@@ -48,7 +51,10 @@ case class CompositeValuesContributor(valuesContributors: List[ValuesContributor
 object ValuesContributor {
   def apply(enableLookups: Boolean, lookupFilesByName: Map[String, File], sourceSchema: StructType): ValuesContributor = {
     val contributors = if(enableLookups) {
-      List(SimpleLookupValuesContributor(lookupFilesByName, sourceSchema), SimpleSourceValuesContributor(sourceSchema))
+      List(
+        ListLookupValuesContributor(lookupFilesByName, sourceSchema),
+        SimpleLookupValuesContributor(lookupFilesByName, sourceSchema),
+        SimpleSourceValuesContributor(sourceSchema))
     } else {
       List(SimpleSourceValuesContributor(sourceSchema))
     }
