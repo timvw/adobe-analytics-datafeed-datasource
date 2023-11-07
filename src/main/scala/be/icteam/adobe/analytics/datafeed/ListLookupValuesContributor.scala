@@ -17,6 +17,7 @@ case class ListLookupValuesContributor(lookupFilesByName: Map[String, File], sou
   private case class ListLookupRule(lookupfileName: String, phyiscalColumnName: String, resultSchemaField: StructField)
 
   private val listLookupRules = List(
+    ListLookupRule(LookupFile.Names.event, "event_list", StructField("event_list", ArrayType(StringType))),
     ListLookupRule(LookupFile.Names.event, "post_event_list", StructField("post_event_list", ArrayType(StringType))))
 
   override def getFieldsWhichCanBeContributed(): List[StructField] = rulesWhichCanContribute.map(_.resultSchemaField)
@@ -34,9 +35,16 @@ case class ListLookupValuesContributor(lookupFilesByName: Map[String, File], sou
       (row: GenericInternalRow, columns: Array[String]) => {
         val parsedValue = columns(physicalFieldIndex)
         val value = if (parsedValue == null) null else {
-          val listValues = parsedValue.split(",")
-          val lookedupValues = listValues.map(x => lookupDatabase.get(x.getBytes))
-          ArrayData.toArrayData(lookedupValues.map(x => if (x == null) null else UTF8String.fromBytes(x)))
+          val items = parsedValue.split(",")
+          val lookupedValuesAndProperties = items.map(x => {
+            if(x.contains("=")) {
+              UTF8String.fromString(x)
+            } else {
+              val foundValue = lookupDatabase.get(x.getBytes)
+              if (foundValue == null) null else UTF8String.fromBytes(foundValue)
+            }
+          })
+          ArrayData.toArrayData(lookupedValuesAndProperties)
         }
         row.update(requestedFieldIndex, value)
       }
