@@ -18,7 +18,9 @@ case class ListLookupValuesContributor(lookupFilesByName: Map[String, File], sou
 
   private val listLookupRules = List(
     ListLookupRule(LookupFile.Names.event, "event_list", StructField("event_list", ArrayType(StringType))),
-    ListLookupRule(LookupFile.Names.event, "post_event_list", StructField("post_event_list", ArrayType(StringType))))
+    ListLookupRule(LookupFile.Names.event, "post_event_list", StructField("post_event_list", ArrayType(StringType))),
+    ListLookupRule(LookupFile.Names.event, "product_list", StructField("product_list", ArrayType(StringType))),
+    ListLookupRule(LookupFile.Names.event, "post_product_list", StructField("post_product_list", ArrayType(StringType))))
 
   override def getFieldsWhichCanBeContributed(): List[StructField] = rulesWhichCanContribute.map(_.resultSchemaField)
 
