@@ -2,20 +2,27 @@ package be.icteam.adobe.analytics.datafeed
 
 import com.univocity.parsers.tsv.{TsvParser, TsvParserSettings}
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
+import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.types.{ArrayType, StringType, StructField, StructType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.rocksdb.{Options, RocksDB}
 
-import java.io.{File, FileInputStream}
+import java.io.{ByteArrayInputStream, File, FileInputStream}
 import java.nio.file.Files
 
+import scala.collection.JavaConverters._
 
+case class ListLookupValuesContributor(lookupFilesByName: Map[String, File], sourceSchema: StructType) extends ValuesContributor with AutoCloseable {
 
-  case class SimpleLookupValuesContributor(lookupFilesByName: Map[String, File], sourceSchema: StructType) extends ValuesContributor with AutoCloseable {
+  private case class ListLookupRule(lookupfileName: String, phyiscalColumnName: String, resultSchemaField: StructField)
+
+  private val listLookupRules = List(
+    ListLookupRule(LookupFile.Names.event, "post_event_list", StructField("post_event_list", ArrayType(StringType))))
 
   override def getFieldsWhichCanBeContributed(): List[StructField] = rulesWhichCanContribute.map(_.resultSchemaField)
 
   override def getContributor(alreadyContributedFields: List[StructField], requestedSchema: StructType): Contributor = {
+
     val contributingLookupRules = getContributingRules(requestedSchema)
     buildLookupDatabases(contributingLookupRules)
     val contributedFields = contributingLookupRules.map(_.resultSchemaField)
@@ -27,8 +34,9 @@ import java.nio.file.Files
       (row: GenericInternalRow, columns: Array[String]) => {
         val parsedValue = columns(physicalFieldIndex)
         val value = if (parsedValue == null) null else {
-          val foundValue = lookupDatabase.get(parsedValue.getBytes)
-          UTF8String.fromBytes(foundValue)
+          val listValues = parsedValue.split(",")
+          val lookedupValues = listValues.map(x => lookupDatabase.get(x.getBytes))
+          ArrayData.toArrayData(lookedupValues.map(x => if (x == null) null else UTF8String.fromBytes(x)))
         }
         row.update(requestedFieldIndex, value)
       }
@@ -39,46 +47,23 @@ import java.nio.file.Files
     }
 
     Contributor(contributedFields, contributeFunction)
+
+
   }
 
-  /** *
-   * Represents a rule which specified how the resulting schema should be enriched with a value being looked up in the lookupfile
-   *
-   * @param lookupfileName     the name of the file in which the value will searched for the given key
-   * @param phyiscalColumnName the name of the column in the hitdata file which will be used as key for lookup
-   * @param resultSchemaField  the field in which the result of the lookup will be stored
-   */
-  private case class SimpleLookupRule(lookupfileName: String, phyiscalColumnName: String, resultSchemaField: StructField)
-
-  private val simpleLookupRules = List(
-    SimpleLookupRule(LookupFile.Names.browser, "browser", StructField("browser", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.browser_type, "browser", StructField("browser_type", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.carrier, "carrier", StructField("carrier", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.color_depth, "color", StructField("color", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.connection_type, "connection_type", StructField("connection_type", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.country, "country", StructField("country", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.javascript_version, "javascript", StructField("javascript", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.languages, "language", StructField("language", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.operating_systems, "os", StructField("os", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.operating_system_type, "os", StructField("os_type", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.plugins, "plugin", StructField("plugin", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.resolution, "resolution", StructField("resolution", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.referrer_type, "ref_type", StructField("ref_type", StringType, true)),
-    SimpleLookupRule(LookupFile.Names.search_engines, "search_engine", StructField("search_engine", StringType, true)),
-  )
-
   private val rulesWhichCanContribute = {
-    def fileExistsForLookupRule(simpleLookupRule: SimpleLookupRule): Boolean = lookupFilesByName.contains(simpleLookupRule.lookupfileName)
+    def fileExistsForLookupRule(listLookupRule: ListLookupRule): Boolean = lookupFilesByName.contains(listLookupRule.lookupfileName)
 
-    def sourceFieldExistsForLookupRule(simpleLookupRule: SimpleLookupRule): Boolean = sourceSchema.fieldNames.contains(simpleLookupRule.phyiscalColumnName)
+    def sourceFieldExistsForLookupRule(listLookupRule: ListLookupRule): Boolean = sourceSchema.fieldNames.contains(listLookupRule.phyiscalColumnName)
 
-    simpleLookupRules
+    listLookupRules
       .filter(fileExistsForLookupRule)
       .filter(sourceFieldExistsForLookupRule)
   }
 
   private def getContributingRules(requestedSchema: StructType) = {
-    def lookupFieldIsRequested(simpleLookupRule: SimpleLookupRule): Boolean = requestedSchema.fieldNames.contains(simpleLookupRule.resultSchemaField.name)
+    def lookupFieldIsRequested(listLookupRule: ListLookupRule): Boolean = requestedSchema.fieldNames.contains(listLookupRule.resultSchemaField.name)
+
     rulesWhichCanContribute.filter(lookupFieldIsRequested)
   }
 
@@ -111,7 +96,7 @@ import java.nio.file.Files
     lookupFileDb
   }
 
-  private def buildLookupDatabases(contributingLookupRules: Seq[SimpleLookupRule]): Unit = {
+  private def buildLookupDatabases(contributingLookupRules: Seq[ListLookupRule]): Unit = {
     val contributingLookupFiles = contributingLookupRules
       .map(_.lookupfileName)
       .toSet

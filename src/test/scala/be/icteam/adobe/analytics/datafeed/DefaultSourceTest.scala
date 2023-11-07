@@ -70,4 +70,23 @@ class DefaultSourceTest extends AnyFunSuite {
 
     spark.stop()
   }
+
+  test("read datafeed with list") {
+    val spark = TestUtil.getSparkSession()
+
+    val df = spark.read
+      .format("datafeed")
+      .load(feedPath)
+      .select(col("post_event_list"))
+      //.filter(col("post_event_list").isNotNull)
+
+    df.printSchema()
+
+    //val os = df.take(1)(0).getString(0)
+    //assert(os == "1550374905")
+    df.show(10, false)
+    //df.printSchema()
+
+    spark.stop()
+  }
 }
