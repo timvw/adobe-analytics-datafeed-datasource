@@ -1,6 +1,6 @@
 package be.icteam.adobe.analytics.datafeed
 
-import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.sql.{AnalysisException, SparkSession}
 // needed for 'the read clickstream extension method works' test
@@ -76,15 +76,18 @@ class DefaultSourceTest extends AnyFunSuite {
 
     val df = spark.read
       .format("datafeed")
+      //.option(DatafeedOptions.ENABLE_LOOKUPS, "false")
       .load(feedPath)
-      .select(col("post_event_list"))
-      //.filter(col("post_event_list").isNotNull)
+      //.select(col("mobile_attributes")).filter(col("mobile_attributes").isNotNull)
+      //.select(col("mobile_id")).filter(col("mobile_id").isNotNull)
+      //.select(col("mobile_attributes").getField("Manufacturer").as("XM"))
+      //.filter(col("XM").isNotNull)
 
-    df.printSchema()
+    //df.printSchema()
 
     //val os = df.take(1)(0).getString(0)
     //assert(os == "1550374905")
-    df.show(10, false)
+    //df.show(10, false)
     //df.printSchema()
 
     spark.stop()
