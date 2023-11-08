@@ -7,6 +7,8 @@ import java.io.File
 
 /**
  * Contributes values to a row of Datafeed data
+ *
+ *  @see https://github.com/assafmendelson/DataSourceV2/blob/master/src/main/scala/com/example/sources/readers/internal/row/README.md
  */
 trait ValuesContributor {
   /**
@@ -52,6 +54,7 @@ object ValuesContributor {
   def apply(enableLookups: Boolean, lookupFilesByName: Map[String, File], sourceSchema: StructType): ValuesContributor = {
     val contributors = if(enableLookups) {
       List(
+        MobileAttributeValuesContributor(lookupFilesByName, sourceSchema),
         EventListValuesContributor(lookupFilesByName, sourceSchema),
         ProductListValuesContributor(sourceSchema),
         SimpleLookupValuesContributor(lookupFilesByName, sourceSchema),

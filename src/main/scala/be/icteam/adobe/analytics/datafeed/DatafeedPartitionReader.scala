@@ -27,7 +27,9 @@ case class DatafeedPartitionReader(conf: Configuration, partition: DatafeedParti
   val valuesContributor = ValuesContributor(options.enableLookups, lookupFilesByName, schemaForDatafile)
   val contributor = valuesContributor.getContributor(List.empty, requestedSchema)
 
-  override def next(): Boolean = iter.hasNext
+  override def next(): Boolean = {
+    iter.hasNext
+  }
 
   override def get(): InternalRow = {
     val row = new GenericInternalRow(requestedSchema.length)
