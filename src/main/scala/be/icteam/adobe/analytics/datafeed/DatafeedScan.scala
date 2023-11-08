@@ -1,5 +1,6 @@
 package be.icteam.adobe.analytics.datafeed
 
+import be.icteam.adobe.analytics.datafeed.util.ManifestFile
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.read._
 import org.apache.spark.sql.types.StructType

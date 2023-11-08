@@ -1,4 +1,4 @@
-package be.icteam.adobe.analytics.datafeed
+package be.icteam.adobe.analytics.datafeed.util
 
 import com.univocity.parsers.tsv.{TsvParser, TsvParserSettings}
 import org.rocksdb.{Options, RocksDB}

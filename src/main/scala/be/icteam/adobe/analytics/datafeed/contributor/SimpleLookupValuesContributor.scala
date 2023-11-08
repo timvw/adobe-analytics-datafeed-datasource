@@ -1,6 +1,6 @@
 package be.icteam.adobe.analytics.datafeed.contributor
 
-import be.icteam.adobe.analytics.datafeed.LookupFile
+import be.icteam.adobe.analytics.datafeed.util.LookupFile
 import com.univocity.parsers.tsv.{TsvParser, TsvParserSettings}
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.types.{StringType, StructField, StructType}

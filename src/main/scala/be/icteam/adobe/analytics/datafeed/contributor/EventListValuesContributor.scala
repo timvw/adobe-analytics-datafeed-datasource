@@ -1,6 +1,6 @@
 package be.icteam.adobe.analytics.datafeed.contributor
 
-import be.icteam.adobe.analytics.datafeed.{LookupDatabase, LookupFile}
+import be.icteam.adobe.analytics.datafeed.util.{LookupDatabase, LookupFile}
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.types.{ArrayType, StringType, StructField, StructType}

@@ -1,6 +1,7 @@
 package be.icteam.adobe.analytics.datafeed
 
 import be.icteam.adobe.analytics.datafeed.contributor.ValuesContributor
+import be.icteam.adobe.analytics.datafeed.util.LookupFile
 import com.univocity.parsers.tsv.{TsvParser, TsvParserSettings}
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.sql.catalyst.InternalRow

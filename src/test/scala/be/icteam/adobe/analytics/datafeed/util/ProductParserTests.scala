@@ -1,4 +1,4 @@
-package be.icteam.adobe.analytics.datafeed
+package be.icteam.adobe.analytics.datafeed.util
 
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -9,7 +9,7 @@ class ProductParserTests extends AnyFunSuite {
   /* examples from: https://experienceleague.adobe.com/docs/analytics/implementation/vars/page-vars/products.html?lang=en */
   test("parse product") {
 
-    import Product.Parser.parseProducts
+    import be.icteam.adobe.analytics.datafeed.util.Product.Parser.parseProducts
 
     // Include only product and category. Common on individual product pages// Include only product and category. Common on individual product pages
     assert(parseProducts("Example category;Example product") == List(

@@ -1,4 +1,4 @@
-package be.icteam.adobe.analytics.datafeed
+package be.icteam.adobe.analytics.datafeed.util
 
 import org.apache.hadoop.fs.Path
 import org.scalatest.funsuite.AnyFunSuite

@@ -1,5 +1,6 @@
-package be.icteam.adobe.analytics.datafeed
+package be.icteam.adobe.analytics.datafeed.util
 
+import be.icteam.adobe.analytics.datafeed.DatafeedOptions
 import com.univocity.parsers.tsv.{TsvParser, TsvParserSettings}
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
