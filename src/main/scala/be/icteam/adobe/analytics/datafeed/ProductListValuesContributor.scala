@@ -5,11 +5,9 @@ import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.types.{ArrayType, StringType, StructField, StructType}
 import org.apache.spark.unsafe.types.UTF8String
 
-import java.io.File
+case class ProductListValuesContributor(sourceSchema: StructType) extends ValuesContributor with AutoCloseable {
 
-case class ProductListValuesContributor(lookupFilesByName: Map[String, File], sourceSchema: StructType) extends ValuesContributor with AutoCloseable {
-
-  private case class ListLookupRule(lookupfileName: String, phyiscalColumnName: String, resultSchemaField: StructField)
+  private case class ListLookupRule(sourceColumnName: String, resultSchemaField: StructField)
 
   private val keyValueSchema = StructType(Array(
     StructField("key", StringType),
@@ -26,8 +24,8 @@ case class ProductListValuesContributor(lookupFilesByName: Map[String, File], so
   ))
 
   private val listLookupRules = List(
-    ListLookupRule(LookupFile.Names.event, "product_list", StructField("product_list", ArrayType(productSchema))),
-    ListLookupRule(LookupFile.Names.event, "post_product_list", StructField("post_product_list", ArrayType(productSchema))))
+    ListLookupRule("product_list", StructField("product_list", ArrayType(productSchema))),
+    ListLookupRule("post_product_list", StructField("post_product_list", ArrayType(productSchema))))
 
   override def getFieldsWhichCanBeContributed(): List[StructField] = rulesWhichCanContribute.map(_.resultSchemaField)
 
@@ -55,11 +53,10 @@ case class ProductListValuesContributor(lookupFilesByName: Map[String, File], so
   override def getContributor(alreadyContributedFields: List[StructField], requestedSchema: StructType): Contributor = {
 
     val contributingLookupRules = getContributingRules(requestedSchema)
-    buildLookupDatabases(contributingLookupRules)
     val contributedFields = contributingLookupRules.map(_.resultSchemaField)
 
     val contributeFunctions = contributingLookupRules.map(simpleLookupRule => {
-      val physicalFieldIndex = sourceSchema.fieldIndex(simpleLookupRule.phyiscalColumnName)
+      val physicalFieldIndex = sourceSchema.fieldIndex(simpleLookupRule.sourceColumnName)
       val requestedFieldIndex = requestedSchema.fieldIndex(simpleLookupRule.resultSchemaField.name)
 
       (row: GenericInternalRow, columns: Array[String]) => {
@@ -81,12 +78,9 @@ case class ProductListValuesContributor(lookupFilesByName: Map[String, File], so
   }
 
   private val rulesWhichCanContribute = {
-    def fileExistsForLookupRule(listLookupRule: ListLookupRule): Boolean = lookupFilesByName.contains(listLookupRule.lookupfileName)
-
-    def sourceFieldExistsForLookupRule(listLookupRule: ListLookupRule): Boolean = sourceSchema.fieldNames.contains(listLookupRule.phyiscalColumnName)
+    def sourceFieldExistsForLookupRule(listLookupRule: ListLookupRule): Boolean = sourceSchema.fieldNames.contains(listLookupRule.sourceColumnName)
 
     listLookupRules
-      .filter(fileExistsForLookupRule)
       .filter(sourceFieldExistsForLookupRule)
   }
 
@@ -96,24 +90,6 @@ case class ProductListValuesContributor(lookupFilesByName: Map[String, File], so
     rulesWhichCanContribute.filter(lookupFieldIsRequested)
   }
 
-  private var lookupDatabasesByName: Map[String, LookupDatabase] = _
-
   override def close(): Unit = {
-    Option(lookupDatabasesByName).foreach(x => x.foreach(_._2.close()))
-  }
-
-  private def buildLookupFileDatabase(lookupFileName: String) = {
-    val lookupFile = lookupFilesByName(lookupFileName)
-    LookupDatabase(lookupFile)
-  }
-
-  private def buildLookupDatabases(contributingLookupRules: Seq[ListLookupRule]): Unit = {
-    val contributingLookupFiles = contributingLookupRules
-      .map(_.lookupfileName)
-      .toSet
-
-    lookupDatabasesByName = contributingLookupFiles
-      .map(x => (x, buildLookupFileDatabase(x)))
-      .toMap
   }
 }
