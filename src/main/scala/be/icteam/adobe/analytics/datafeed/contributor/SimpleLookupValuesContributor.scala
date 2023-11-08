@@ -1,14 +1,11 @@
 package be.icteam.adobe.analytics.datafeed.contributor
 
-import be.icteam.adobe.analytics.datafeed.util.LookupFile
-import com.univocity.parsers.tsv.{TsvParser, TsvParserSettings}
+import be.icteam.adobe.analytics.datafeed.util.{LookupDatabase, LookupFile}
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.unsafe.types.UTF8String
-import org.rocksdb.{Options, RocksDB}
 
-import java.io.{File, FileInputStream}
-import java.nio.file.Files
+import java.io.File
 
 
 
@@ -83,33 +80,15 @@ import java.nio.file.Files
     rulesWhichCanContribute.filter(lookupFieldIsRequested)
   }
 
-  var lookupDatabasesByName: Map[String, RocksDB] = _
+  var lookupDatabasesByName: Map[String, LookupDatabase] = _
 
   override def close(): Unit = {
     Option(lookupDatabasesByName).foreach(x => x.foreach(_._2.close()))
   }
 
   private def buildLookupFileDatabase(lookupFileName: String) = {
-    RocksDB.loadLibrary()
-
-    val options = new Options()
-      .setCreateIfMissing(true)
-      .setUseDirectReads(true)
-
-    val lookupFileDbDir = Files.createTempDirectory(s"lookups-${lookupFileName}")
-    val lookupFileDb = RocksDB.open(options, lookupFileDbDir.toString)
-
-    import scala.collection.JavaConverters._
     val lookupFile = lookupFilesByName(lookupFileName)
-    val lookupStream = new FileInputStream(lookupFile)
-    val tsvParserSettings = new TsvParserSettings
-    tsvParserSettings.setMaxColumns(10)
-    val tokenizer = new TsvParser(tsvParserSettings)
-    tokenizer.iterate(lookupStream).iterator().asScala.foreach(x => {
-      lookupFileDb.put(x(0).getBytes, x(1).getBytes)
-    })
-    lookupStream.close()
-    lookupFileDb
+    LookupDatabase(lookupFile)
   }
 
   private def buildLookupDatabases(contributingLookupRules: Seq[SimpleLookupRule]): Unit = {
