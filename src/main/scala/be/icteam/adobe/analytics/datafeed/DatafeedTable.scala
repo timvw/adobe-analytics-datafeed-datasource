@@ -1,5 +1,6 @@
 package be.icteam.adobe.analytics.datafeed
 
+import be.icteam.adobe.analytics.datafeed.contributor.ValuesContributor
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.catalog.{SupportsRead, Table, TableCapability}

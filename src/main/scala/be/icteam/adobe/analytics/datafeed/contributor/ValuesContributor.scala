@@ -1,4 +1,4 @@
-package be.icteam.adobe.analytics.datafeed
+package be.icteam.adobe.analytics.datafeed.contributor
 
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.types.{StructField, StructType}

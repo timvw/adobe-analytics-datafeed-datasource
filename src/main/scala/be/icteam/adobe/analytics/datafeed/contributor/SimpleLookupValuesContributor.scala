@@ -1,8 +1,9 @@
-package be.icteam.adobe.analytics.datafeed
+package be.icteam.adobe.analytics.datafeed.contributor
 
+import be.icteam.adobe.analytics.datafeed.LookupFile
 import com.univocity.parsers.tsv.{TsvParser, TsvParserSettings}
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
-import org.apache.spark.sql.types.{ArrayType, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.rocksdb.{Options, RocksDB}
 
