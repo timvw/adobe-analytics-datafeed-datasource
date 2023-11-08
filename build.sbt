@@ -15,7 +15,7 @@ ThisBuild / scalaVersion := scala212
 
 ThisBuild / crossScalaVersions := supportedScalaVersions
 
-val sparkVersion = "3.3.0"
+val sparkVersion = "3.5.0"
 ThisBuild / libraryDependencies ++= List(
   "org.apache.spark" %% "spark-sql" % sparkVersion
 )
