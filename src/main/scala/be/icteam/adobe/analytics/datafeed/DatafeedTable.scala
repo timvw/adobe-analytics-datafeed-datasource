@@ -10,7 +10,6 @@ import org.apache.spark.sql.execution.datasources.PathFilterFactory
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
-import java.util
 import scala.collection.JavaConverters._
 
 case class DatafeedTable(name: String,
@@ -41,7 +40,7 @@ case class DatafeedTable(name: String,
     StructType(fieldsWhichCanBeContributed)
   }
 
-  override def capabilities(): util.Set[TableCapability] = Set(TableCapability.BATCH_READ).asJava
+  override def capabilities(): java.util.Set[TableCapability] = Set(TableCapability.BATCH_READ).asJava
 
   override def newScanBuilder(options: CaseInsensitiveStringMap): ScanBuilder = {
     DatafeedScanBuilder(sparkSession, this.options, manifestFiles, schema)
