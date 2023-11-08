@@ -6,14 +6,19 @@ import org.apache.spark.sql.types.{ArrayType, StringType, StructField, StructTyp
 import org.apache.spark.unsafe.types.UTF8String
 
 import java.io.File
+import java.util.regex.Pattern
 
 case class EventListValuesContributor(lookupFilesByName: Map[String, File], sourceSchema: StructType) extends ValuesContributor with AutoCloseable {
 
   private case class ListLookupRule(lookupfileName: String, phyiscalColumnName: String, resultSchemaField: StructField)
 
+  private val eventSchema = StructType(Array(
+    StructField("event", StringType),
+    StructField("value", StringType)))
+
   private val listLookupRules = List(
-    ListLookupRule(LookupFile.Names.event, "event_list", StructField("event_list", ArrayType(StringType))),
-    ListLookupRule(LookupFile.Names.event, "post_event_list", StructField("post_event_list", ArrayType(StringType))))
+    ListLookupRule(LookupFile.Names.event, "event_list", StructField("event_list", ArrayType(eventSchema))),
+    ListLookupRule(LookupFile.Names.event, "post_event_list", StructField("post_event_list", ArrayType(eventSchema))))
 
   override def getFieldsWhichCanBeContributed(): List[StructField] = rulesWhichCanContribute.map(_.resultSchemaField)
 
@@ -26,12 +31,27 @@ case class EventListValuesContributor(lookupFilesByName: Map[String, File], sour
     val contributeFunctions = contributingLookupRules.map(simpleLookupRule => {
       val physicalFieldIndex = sourceSchema.fieldIndex(simpleLookupRule.phyiscalColumnName)
       val requestedFieldIndex = requestedSchema.fieldIndex(simpleLookupRule.resultSchemaField.name)
-      //val lookupDatabase = lookupDatabasesByName(simpleLookupRule.lookupfileName)
+      val lookupDatabase = lookupDatabasesByName(simpleLookupRule.lookupfileName)
+
+      val itemSeparatorPattern = Pattern.compile("(?<!\\^),")
+      val assignmentPattern = Pattern.compile("(?<!\\^)=")
+
       (row: GenericInternalRow, columns: Array[String]) => {
         val parsedValue = columns(physicalFieldIndex)
         val value = if (parsedValue == null) null else {
-          // lookup the thingie...
-          null
+          // 20117=3.06,20118,100,102
+          val items = itemSeparatorPattern.split(parsedValue)
+          val itemList = items.map(x => {
+            val parts = assignmentPattern.split(x,2)
+            val eventRow = new GenericInternalRow(2)
+            val foundEvent = lookupDatabase.get(parts(0).getBytes)
+            eventRow.update(0, UTF8String.fromBytes(foundEvent))
+            if(parts.length > 1) {
+              eventRow.update(1, UTF8String.fromString(parts(1)))
+            }
+            eventRow
+          })
+          ArrayData.toArrayData(itemList)
         }
         row.update(requestedFieldIndex, value)
       }
