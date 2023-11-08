@@ -20,7 +20,7 @@ ThisBuild / libraryDependencies ++= List(
   "org.apache.spark" %% "spark-sql" % sparkVersion
 )
 
-val scalaTestVersion = "3.1.2"
+val scalaTestVersion = "3.2.17"
 ThisBuild / libraryDependencies ++= List(
   "org.scalatest" %% "scalatest" % scalaTestVersion % Test
 )
