@@ -52,7 +52,8 @@ object ValuesContributor {
   def apply(enableLookups: Boolean, lookupFilesByName: Map[String, File], sourceSchema: StructType): ValuesContributor = {
     val contributors = if(enableLookups) {
       List(
-        ProductListValuesContributor(lookupFilesByName, sourceSchema),
+        EventListValuesContributor(lookupFilesByName, sourceSchema),
+        ProductListValuesContributor(sourceSchema),
         SimpleLookupValuesContributor(lookupFilesByName, sourceSchema),
         SimpleSourceValuesContributor(sourceSchema))
     } else {
