@@ -64,8 +64,7 @@ case class MobileAttributeValuesContributor(lookupFilesByName: Map[String, File]
   private case class SimpleLookupRule(lookupfileName: String, phyiscalColumnName: String, resultSchemaField: StructField)
 
   private lazy val mobileAttributesSchema = {
-    val fullSchema = MobileAttributes.getSchema()
-    StructType(fullSchema.fields.filter(x => x.name != "mobile_id"))
+    StructType(MobileAttributes.schema.fields.filter(x => x.name != "mobile_id"))
   }
 
   private val simpleLookupRules = List(
