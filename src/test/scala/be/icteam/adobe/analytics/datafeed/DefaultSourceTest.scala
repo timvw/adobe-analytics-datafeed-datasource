@@ -11,13 +11,13 @@ class DefaultSourceTest extends AnyFunSuite {
 
   val feedPath = "./src/test/resources/randyzwitch"
 
-  ignore("generic file source options work as expected") {
+  test("generic file source options work as expected") {
 
     val spark = TestUtil.getSparkSession()
 
     val df = spark.read
       .format("datafeed")
-      .option(DatafeedOptions.MODIFIED_AFTER, "2023-11-01T14:56:00")
+      .option(DatafeedOptions.MODIFIED_AFTER, "2023-11-07T14:56:00")
       .load(feedPath)
 
     assert(df.count() == 0)
