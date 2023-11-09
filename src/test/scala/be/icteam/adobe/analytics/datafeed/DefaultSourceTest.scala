@@ -75,20 +75,12 @@ class DefaultSourceTest extends AnyFunSuite {
     val spark = TestUtil.getSparkSession()
 
     val df = spark.read
-      .format("datafeed")
+      .format(DatafeedOptions.SOURCE_NAME)
       //.option(DatafeedOptions.ENABLE_LOOKUPS, "false")
       .load(feedPath)
-      //.select(col("mobile_attributes")).filter(col("mobile_attributes").isNotNull)
-      //.select(col("mobile_id")).filter(col("mobile_id").isNotNull)
-      //.select(col("mobile_attributes").getField("Manufacturer").as("XM"))
-      //.filter(col("XM").isNotNull)
 
     //df.printSchema()
-
-    //val os = df.take(1)(0).getString(0)
-    //assert(os == "1550374905")
-    //df.show(10, false)
-    //df.printSchema()
+    df.show(10, false)
 
     spark.stop()
   }
