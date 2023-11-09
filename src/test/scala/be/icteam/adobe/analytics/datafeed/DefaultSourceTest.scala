@@ -80,7 +80,7 @@ class DefaultSourceTest extends AnyFunSuite {
       .load(feedPath)
 
     //df.printSchema()
-   // df.show(10, false)
+    df.show(10, false)
 
     spark.stop()
   }

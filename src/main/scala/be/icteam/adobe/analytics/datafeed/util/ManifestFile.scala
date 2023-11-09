@@ -1,15 +1,16 @@
 package be.icteam.adobe.analytics.datafeed.util
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.spark.sql.execution.datasources.PathFilterStrategy
 
 import java.io.File
+import java.time.Instant
 import java.util.regex.Pattern
 
 
 
-case class ManifestFile(lookupFiles: List[LookupFile], dataFiles: List[DataFile]) {
+case class ManifestFile(lookupFiles: List[LookupFile], dataFiles: List[DataFile], modificationTime: Long) {
   def write(conf: Configuration, folder: Path): Unit = ManifestFile.write(conf, this, folder)
 
   def extractLookupFiles(conf: Configuration): Map[String, File] = ManifestFile.extractLookupFiles(conf, this)
@@ -23,31 +24,33 @@ case object ManifestFile {
 
     val fs = FileSystem.get(path.toUri, conf)
 
-    val manifestFilePaths =
-      if (fs.getFileStatus(path).isFile)
-        List(path)
-      else {
+    val manifestFilePaths = {
+      val pathFileStatus = fs.getFileStatus(path)
+      if (pathFileStatus.isFile) {
+        List(pathFileStatus)
+      } else {
         val fileIterator = fs.listFiles(path, false)
         Iterator.continually(fileIterator)
           .takeWhile(_.hasNext)
           .map(_.next())
           .filter(x => x.getPath.getName.endsWith(".txt"))
           .filter(x => pathFilters.forall(_.accept(x)))
-          .map(_.getPath)
           .toList
       }
+    }
 
     manifestFilePaths.map(x => ManifestFile.parse(conf, x))
   }
 
-  def parse(conf: Configuration, manifestFilePath: Path): ManifestFile = {
+  def parse(conf: Configuration, fileStatus: FileStatus): ManifestFile = {
+    val manifestFilePath = fileStatus.getPath
     val fs = FileSystem.get(manifestFilePath.toUri, conf)
     val manifestDirectory = manifestFilePath.getParent
     try {
       val manifestText = Util.readTextFile(fs, manifestFilePath)
       val lookupFiles = parseLookupFiles(manifestText, manifestDirectory)
       val dataFiles = parseDataFiles(manifestText, manifestDirectory)
-      ManifestFile(lookupFiles, dataFiles)
+      ManifestFile(lookupFiles, dataFiles, fileStatus.getModificationTime)
     } finally {
       fs.close()
     }
@@ -131,13 +134,15 @@ case object ManifestFile {
       (key, x)
     }).toMap
 
+    val now = Instant.now().toEpochMilli
+
     val manifestFiles = hitdataFilePaths.flatMap(hitdataFilePath => {
       val key = hitdataFilePath.getName.replace("01-", "").replace(".tsv.gz", "")
       lookupFilesByFileset.get(key)
         .map(lookupFilePath => {
           val lookupFiles = List(LookupFile(lookupFilePath, "", ""))
           val dataFiles = List(DataFile(hitdataFilePath, "", ""))
-          ManifestFile(lookupFiles, dataFiles)
+          ManifestFile(lookupFiles, dataFiles, now)
         })
     })
 

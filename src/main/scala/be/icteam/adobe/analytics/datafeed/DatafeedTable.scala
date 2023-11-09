@@ -35,7 +35,7 @@ case class DatafeedTable(name: String,
     val lookupFilesByName = manifestFile.extractLookupFiles(conf)
     val schemaForDataFiles = LookupFile.getSchemaForDataFiles(lookupFilesByName, options)
 
-    val valuesContributor = ValuesContributor(options.enableLookups, lookupFilesByName, schemaForDataFiles)
+    val valuesContributor = ValuesContributor(manifestFile, options, lookupFilesByName, schemaForDataFiles)
     val fieldsWhichCanBeContributed = valuesContributor.getFieldsWhichCanBeContributed()
     StructType(fieldsWhichCanBeContributed)
   }
