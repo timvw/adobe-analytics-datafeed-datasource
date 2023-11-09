@@ -49,12 +49,14 @@ df.show(3, false)
 
 All available options are here:
 [DatafeedOptions.scala](./src/main/scala/be/icteam/adobe/analytics/datafeed/DatafeedOptions.scala)
- 
-Example:
+
+## Store in delta/iceberg format and be done with the madness:
    
 ```scala
 val df = spark.read
   .format("be.icteam.adobe.analytics.datafeed")
-  .option(ClickstreamOptions.MODIFIED_AFTER, "2023-11-01T00:00:00")
-  .load("./src/test/resources/randyzwitch")
+  .option(ClickstreamOptions.MODIFIED_AFTER, checkpoint)
+  .load("s3://bucket/landing/feed")
+
+df.write.format("delta").save("s3://bucket/conformed/feed")
 ```
