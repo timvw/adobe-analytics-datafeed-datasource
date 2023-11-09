@@ -1,5 +1,7 @@
 package be.icteam.adobe.analytics.datafeed.contributor
 
+import be.icteam.adobe.analytics.datafeed.DatafeedOptions
+import be.icteam.adobe.analytics.datafeed.util.ManifestFile
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.types.{StructField, StructType}
 
@@ -51,9 +53,10 @@ case class CompositeValuesContributor(valuesContributors: List[ValuesContributor
 }
 
 object ValuesContributor {
-  def apply(enableLookups: Boolean, lookupFilesByName: Map[String, File], sourceSchema: StructType): ValuesContributor = {
-    val contributors = if(enableLookups) {
+  def apply(manifestFile: ManifestFile, datafeedOptions: DatafeedOptions, lookupFilesByName: Map[String, File], sourceSchema: StructType): ValuesContributor = {
+    val contributors = if(datafeedOptions.enableLookups) {
       List(
+        MetadataValuesContributor(manifestFile, datafeedOptions),
         MobileAttributeValuesContributor(lookupFilesByName, sourceSchema),
         EventListValuesContributor(lookupFilesByName, sourceSchema),
         ProductListValuesContributor(sourceSchema),

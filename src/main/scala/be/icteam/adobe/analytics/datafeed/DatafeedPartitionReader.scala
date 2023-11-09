@@ -24,7 +24,7 @@ case class DatafeedPartitionReader(conf: Configuration, partition: DatafeedParti
   val tokenizer = new TsvParser(tsvParserSettings)
   val iter = tokenizer.iterate(dataFileInputStream).iterator()
 
-  val valuesContributor = ValuesContributor(options.enableLookups, lookupFilesByName, schemaForDatafile)
+  val valuesContributor = ValuesContributor(partition.manifestFile, options, lookupFilesByName, schemaForDatafile)
   val contributor = valuesContributor.getContributor(List.empty, requestedSchema)
 
   override def next(): Boolean = {

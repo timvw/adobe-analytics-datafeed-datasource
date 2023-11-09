@@ -30,6 +30,11 @@ case class DatafeedOptions(parameters: CaseInsensitiveMap[String]) extends Loggi
   def fileEncoding = Charset.forName(parameters.getOrElse(FILE_ENCODING, "ISO-8859-1"))
 
   val enableLookups = parameters.getBool(ENABLE_LOOKUPS, true)
+
+  /**
+   * Defines
+   */
+  val metadataPrefix = parameters.getOrElse("METADATA_PREFIX", "_tech_")
 }
 
 object DatafeedOptions extends DataSourceOptions {
@@ -47,4 +52,6 @@ object DatafeedOptions extends DataSourceOptions {
   val MAX_CHARS_PER_COLUMN = newOption("maxCharsPerColumn")
   val FILE_ENCODING = newOption("fileEncoding")
   val ENABLE_LOOKUPS = newOption("enableLookups")
+
+  val METADATA_PREFIX = newOption("metadataPrefix")
 }
