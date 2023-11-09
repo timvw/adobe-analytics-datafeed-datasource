@@ -17,7 +17,7 @@ class DefaultSourceTest extends AnyFunSuite {
 
     val df = spark.read
       .format("datafeed")
-      .option(DatafeedOptions.MODIFIED_AFTER, "2023-11-07T14:56:00")
+      .option(DatafeedOptions.PATH_GLOB_FILTER, "zwitchdev_2023-*")
       .load(feedPath)
 
     assert(df.count() == 0)
@@ -80,7 +80,7 @@ class DefaultSourceTest extends AnyFunSuite {
       .load(feedPath)
 
     //df.printSchema()
-    df.show(10, false)
+   // df.show(10, false)
 
     spark.stop()
   }
