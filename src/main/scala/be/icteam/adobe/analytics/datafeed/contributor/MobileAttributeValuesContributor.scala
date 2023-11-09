@@ -34,7 +34,14 @@ case class MobileAttributeValuesContributor(lookupFilesByName: Map[String, File]
       (row: GenericInternalRow, columns: Array[String]) => {
         val parsedValue = columns(physicalFieldIndex)
         val value = if (parsedValue == null) null else {
-          lookupDatabase.get(parsedValue.getBytes)
+          val foundValue = lookupDatabase.get(parsedValue.getBytes)
+          if (foundValue == null) {
+            null
+          }
+          else {
+            val deserializedValue: Array[String] = kryoSerializer.deserialize[Array[String]](ByteBuffer.wrap(foundValue))
+            buildLookupValue(deserializedValue)
+          }
         }
         row.update(requestedFieldIndex, value)
       }
@@ -81,7 +88,7 @@ case class MobileAttributeValuesContributor(lookupFilesByName: Map[String, File]
     rulesWhichCanContribute.filter(lookupFieldIsRequested)
   }
 
-  var lookupDatabasesByName: Map[String, LookupDatabase[GenericInternalRow]] = _
+  var lookupDatabasesByName: Map[String, LookupDatabase] = _
 
   override def close(): Unit = {
     Option(lookupDatabasesByName).foreach(x => x.foreach(_._2.close()))
@@ -94,14 +101,16 @@ case class MobileAttributeValuesContributor(lookupFilesByName: Map[String, File]
   }
 
   private val kryoSerializer = new KryoSerializer(new SparkConf()).newInstance()
+
   private def serialize(x: GenericInternalRow): Array[Byte] = kryoSerializer.serialize(x).array()
+
   private def deserialize(bytes: Array[Byte]): GenericInternalRow = {
-    if(bytes == null) null else kryoSerializer.deserialize(ByteBuffer.wrap(bytes))
+    if (bytes == null) null else kryoSerializer.deserialize(ByteBuffer.wrap(bytes))
   }
 
   private def buildLookupFileDatabase(lookupFileName: String) = {
     val lookupFile = lookupFilesByName(lookupFileName)
-    LookupDatabase(lookupFile, buildLookupValue, serialize, deserialize)
+    LookupDatabase(lookupFile, (values => (values(0).getBytes, kryoSerializer.serialize(values.tail).array())))
   }
 
   private def buildLookupDatabases(contributingLookupRules: Seq[SimpleLookupRule]): Unit = {

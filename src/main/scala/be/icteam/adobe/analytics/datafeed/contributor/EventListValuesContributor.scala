@@ -81,7 +81,7 @@ case class EventListValuesContributor(lookupFilesByName: Map[String, File], sour
     rulesWhichCanContribute.filter(lookupFieldIsRequested)
   }
 
-  var lookupDatabasesByName: Map[String, LookupDatabase[Array[Byte]]] = _
+  var lookupDatabasesByName: Map[String, LookupDatabase] = _
 
   override def close(): Unit = {
     Option(lookupDatabasesByName).foreach(x => x.foreach(_._2.close()))
@@ -89,7 +89,7 @@ case class EventListValuesContributor(lookupFilesByName: Map[String, File], sour
 
   private def buildLookupFileDatabase(lookupFileName: String) = {
     val lookupFile = lookupFilesByName(lookupFileName)
-    LookupDatabase(lookupFile, values => values(0).getBytes, (x: Array[Byte]) => x, x => x)
+    LookupDatabase(lookupFile, values => (values(0).getBytes, values(1).getBytes()))
   }
 
   private def buildLookupDatabases(contributingLookupRules: Seq[ListLookupRule]): Unit = {
