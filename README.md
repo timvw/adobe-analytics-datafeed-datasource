@@ -60,3 +60,21 @@ val df = spark.read
 
 df.write.format("delta").save("s3://bucket/conformed/feed")
 ```
+
+## Development
+
+Publish your own version in your local m2 repository:
+
+```bash
+sbt publishM2
+```
+
+## Releases
+
+This project leverages [sbt-ci-release](https://github.com/sbt/sbt-ci-release) to create and publish to Sonatype and Maven Central from GitHub Actions.
+
+Create and push the appropiate tag (vX.Y.Z) and [ci.yml](./github/workflows/ci.yml) will make sure a release is built
+```bash
+git tag v0.1.0
+git push --tags
+```
