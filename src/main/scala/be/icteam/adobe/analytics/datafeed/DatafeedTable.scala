@@ -29,7 +29,7 @@ case class DatafeedTable(name: String,
 
   override def schema(): StructType = maybeUserSpecifiedSchema.getOrElse(inferSchema())
 
-  def inferSchema(): StructType = {
+  lazy val inferredSchema: StructType = {
     // in case no manifests are found, we blow up...
     val manifestFile = manifestFiles.head
     val lookupFilesByName = manifestFile.extractLookupFiles(conf)
@@ -39,6 +39,8 @@ case class DatafeedTable(name: String,
     val fieldsWhichCanBeContributed = valuesContributor.getFieldsWhichCanBeContributed()
     StructType(fieldsWhichCanBeContributed)
   }
+
+  def inferSchema(): StructType = inferredSchema
 
   override def capabilities(): java.util.Set[TableCapability] = Set(TableCapability.BATCH_READ).asJava
 
